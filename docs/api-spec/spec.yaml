@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Simple API
+  description: A simple API to demonstrate an OpenAPI specification.
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com/v1
+    description: Main API server
+
+paths:
+  /users:
+    get:
+      summary: Get a list of users
+      description: Retrieve a list of users from the system.
+      responses:
+        '200':
+          description: A JSON array of user names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      summary: Create a new user
+      description: Create a new user in the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+      responses:
+        '201':
+          description: User created successfully
+
+  /users/{userId}:
+    get:
+      summary: Get a specific user
+      description: Retrieve a specific user by their ID.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A user object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                    example: "John Doe"
+        '404':
+          description: User not found
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          example: "John Doe"

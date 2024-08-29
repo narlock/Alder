@@ -1,0 +1,25 @@
+---
+layout: post
+title:  "Alder v2.0.0"
+date:   2024-08-29 06:30:37 -0500
+categories: jekyll update
+---
+This is the official AlderBot v2.0.0 release. It makes the code open source under the [MIT License](). The goal of this website is to provide documentation and formal updates to the bot.
+
+## Major Release Changes
+- Bot configuration for a server is now configured using a YAML configuration file instead of the server being manually configured.
+- MySQL database schema updated to better support API operations.
+
+### Alder API
+- Direct Discord Bot connection with MySQL database has been replaced with the introduction of the Alder API, a REST API using the Flask framework that handles operations with the database. This allows the bot to simply use the `requests` module to make HTTP requests to the API for performing operations. Additionally created an [OpenAPI specification](/Alder/api-spec) to document the Alder API.
+
+## Features
+- Automatic month reset - produces a message in announcements channel on month change (checked every 15 minutes), assigns awards to the users.
+- Automatic time sync for active users in activity rooms (checked every 15 minutes)
+- `/top` now returns the top 10 users for based on the leaderboard.
+- `/top hstreak` displays the top 10 users sorted by highest streak achieved
+- `/top daily` displays the top 10 users sorted by the daily time
+
+## Other changes
+
+- `/top streak` now displays “current streak” in the title

@@ -1,0 +1,95 @@
+# Configure your MySQL configurations
+mysql:
+  user: user 
+  password: password
+  host: localhost
+  database: alder
+
+# Configure logging level (0: DEBUG, 1: INFO, 2: SUCCESS, 3: WARN, 4: ERROR)
+log.level: 0
+
+api:
+  url: http://127.0.0.1:5000 # Should not change unless changed in API
+
+rogueboss:
+  url: http://localhost:8081/rb # Should not change unless changed in API
+
+# Discord bot configurations
+discord:
+  alder.image: https://tamostudy.com/res/bot.png
+  server: serverId
+  channels:
+    announcement: announcementChannelId
+    rules: rulesChannelId
+    role: roleChannelId
+    info: infoChannelId
+    activity:
+    - activityRoom1Id
+    - activityRoom2Id
+  roles:
+    deepfocus: deepfocusRoleId
+    stream: liveStreamRoleId
+    youtube: youtubeRoleId
+    forest: forestRoleId
+    book: bookClubRoleId
+    staff:
+      group: staffGroupRoleId
+      admin: adminRoleId
+      mod: moderationRoleId
+    sponsor:
+      supporter: supporterRoleId
+      booster: boosterRoleId
+      youtube: youtubeSponsorRoleId
+    special:
+    - alumniRoleId
+    activity:
+      level1: noviceRoleId
+      level2: intermediateRoleId
+      level3: advancedRoleId
+      level4: expertRoleId
+      level5: masterRoleId
+      level6: narlockScholarRoleId
+    color:
+      role1: colorRole1Id
+      role2: colorRole2Id
+      role3: colorRole3Id
+      role4: colorRole4Id
+      role5: colorRole5Id
+      role6: colorRole6Id
+      role7: colorRole7Id
+      role8: colorRole8Id
+      role9: colorRole9Id
+      role10: colorRole10Id
+      role11: colorRole11Id
+      role12: colorRole12Id
+      role13: colorRole13Id
+      role14: colorRole14Id
+      role15: colorRole15Id
+      role16: colorRole16Id
+  command.id:
+    deepfocus: deepfocusCommandId
+    profile: profileCommandId
+    rogueboss: rogueBossCommandId
+    shop: shopCommandId
+    shopcolor: shopColorCommandId
+    shopembed: shopEmbedCommandId
+    help: helpCommandId
+    rules: rulesCommandId
+    achievements: achievementsCommandId
+    roll: rollCommandId
+    eightball: 8ballCommandId
+    motivation: motivationCommandId
+    kanban: kanbanCommandId
+    todo: todoCommandId
+    top: topCommandId
+    trivia: triviaCommandId
+    daily: dailyCommandId
+  emoji:
+    staff: staffEmojiId
+    supporter: supporterEmojiId
+    booster: boosterEmojiId
+    alumni: alumniEmojiId
+  rules:
+  - Rule 1
+  - Rule 2
+  - Rule 3
