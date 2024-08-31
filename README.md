@@ -22,6 +22,8 @@ Alder is a multipurpose [Discord](https://discord.com) bot programmed in Python 
 
 If you find this project helpful or interesting, please consider giving it a ⭐ on GitHub. Your support is greatly appreciated!
 
+For documentation, installation guide, and more about Alder, please visit our [web page](https://alder.narlock.dev)!
+
 ## Contributing to Alder
 Alder is a tool that many people use on my Discord server. This is one of the driving factors for me opening the source code of the bot. There are many times where users have found bugs with Alder. Now that the code is open source, users can now create pull requests to fix bugs!
 
