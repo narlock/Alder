@@ -1,7 +1,7 @@
 author:
   name: narlock
 description: Alder - narlock's Discord bot companion that provides focus, productivity, statistics, and leisure features.
-baseurl: "/Alder"
+baseurl: ""
 
 # Build settings
 remote_theme: jekyll/minima
