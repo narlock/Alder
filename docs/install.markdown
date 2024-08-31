@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Install Guide
-permalink: /install
+permalink: /install/
 ---
 <time>Aug 29, 2024</time>
 
