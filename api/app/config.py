@@ -12,7 +12,7 @@ def read_config(file_path):
             return None
 
 # Configure to your configuration file
-CONFIG = read_config('../alder/config.yaml')
+CONFIG = read_config('../config.yaml')
 
 MYSQL = CONFIG['mysql']
 MYSQL_USER = MYSQL['user']
@@ -21,7 +21,6 @@ MYSQL_HOST = MYSQL['host']
 MYSQL_DATABASE = MYSQL['database']
 
 class Config:
-#     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}')
     PYMYSQL_STRING = f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}'
     print(PYMYSQL_STRING)
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', PYMYSQL_STRING)

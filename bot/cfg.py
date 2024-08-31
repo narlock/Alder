@@ -31,7 +31,7 @@ def read_config(file_path):
             return None
 
 # Configure to your configuration file
-CONFIG = read_config('config.yaml')
+CONFIG = read_config('../config.yaml')
 
 """
 Access configuration values, examples:
