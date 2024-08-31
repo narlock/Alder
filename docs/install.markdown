@@ -11,7 +11,7 @@ The official bot that runs this source code is found on the [narlock Discord ser
 ### Dependencies
 - [Python 3.11+](https://www.python.org/)
 - [MySQL](https://www.mysql.com/) or [MariaDB](https://mariadb.org/)
-- [Alder API]() (Part of the AlderBot code repository)
+- [Alder API](https://alder.narlock.dev/api-spec) (Part of the AlderBot code repository)
 - [Discord API](https://discord.com/developers/docs/intro)
 - [Rogue Boss](https://github.com/narlock/RogueBoss) (optional)
 

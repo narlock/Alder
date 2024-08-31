@@ -1,30 +1,330 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: Simple API
-  description: A simple API to demonstrate an OpenAPI specification.
+  title: Alder API
   version: 1.0.0
-
-servers:
-  - url: https://api.example.com/v1
-    description: Main API server
-
 paths:
-  /users:
+  /accomplishments/{user_id}:
     get:
-      summary: Get a list of users
-      description: Retrieve a list of users from the system.
+      tags:
+        - Accomplishments
+      summary: Get accomplishments by user ID
+      description: Gets all of the accomplishments that match the user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose accomplishments are to be retrieved.
+          schema:
+            type: integer
       responses:
         '200':
-          description: A JSON array of user names
+          description: A list of accomplishments for the specified user.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: string
+                  $ref: '#/components/schemas/Accomplishment'
+        '404':
+          description: No accomplishments found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Accomplishments
+      summary: Delete accomplishments by user ID
+      description: Delete all accomplishments that match the user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose accomplishments are to be deleted.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: All accomplishments deleted successfully.
+        '404':
+          description: No accomplishments found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /accomplishments:
     post:
-      summary: Create a new user
-      description: Create a new user in the system.
+      tags:
+        - Accomplishments
+      summary: Create a new accomplishment
+      description: Creates an accomplishment for the user based on the provided message in the request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Accomplishment'
+      responses:
+        '201':
+          description: Accomplishment created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accomplishment'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /achievements/{user_id}:
+    get:
+      tags:
+        - Achievements
+      summary: Get achievements by user ID
+      description: Gets all of the achievements that match the user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose achievements are to be retrieved.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of achievements for the specified user.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Achievement'
+        '404':
+          description: No achievements found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Achievements
+      summary: Delete achievements by user ID
+      description: Delete all achievements that match the user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose achievements are to be deleted.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: All achievements deleted successfully.
+        '404':
+          description: No achievements found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /achievements:
+    post:
+      tags:
+        - Achievements
+      summary: Create a new achievement
+      description: Creates an achievement entry for the provided id and user_id in the request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Achievement'
+      responses:
+        '201':
+          description: Achievement created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Achievement'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /dailytime:
+    get:
+      tags:
+        - DailyTime
+      summary: Get DailyTime by primary key
+      description: Retrieve a DailyTime record using its full composite primary key (user_id, d, mth, yr).
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+        - name: d
+          in: query
+          required: true
+          description: The day of the month.
+          schema:
+            type: integer
+        - name: mth
+          in: query
+          required: true
+          description: The month.
+          schema:
+            type: integer
+        - name: yr
+          in: query
+          required: true
+          description: The year.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested DailyTime record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyTime'
+        '400':
+          description: Missing required query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: DailyTime record not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /dailytime/{user_id}:
+    get:
+      tags:
+        - DailyTime
+      summary: Get today's DailyTime entry by user ID
+      description: Retrieve today's DailyTime entry for the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The DailyTime record for today.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyTime'
+        '404':
+          description: No DailyTime record found for today.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - DailyTime
+      summary: Create a new DailyTime entry for today
+      description: Create a new DailyTime entry for the specified user ID for the current day.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: DailyTime record created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyTime'
+        '400':
+          description: DailyTime record for today already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      tags:
+        - DailyTime
+      summary: Update today's stime for the user
+      description: Update the stime value of today's DailyTime entry for the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -32,46 +332,2054 @@ paths:
             schema:
               type: object
               properties:
-                name:
-                  type: string
-                  example: "John Doe"
-      responses:
-        '201':
-          description: User created successfully
-
-  /users/{userId}:
-    get:
-      summary: Get a specific user
-      description: Retrieve a specific user by their ID.
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
+                stime:
+                  type: integer
+                  description: The amount of stime to add.
+              required:
+                - stime
       responses:
         '200':
-          description: A user object
+          description: DailyTime stime updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyTime'
+        '400':
+          description: Missing required field stime.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No DailyTime record found for today.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - DailyTime
+      summary: Delete all DailyTime entries for a user
+      description: Delete all DailyTime entries associated with the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose DailyTime entries are to be deleted.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: All DailyTime records deleted successfully.
+        '404':
+          description: No DailyTime records found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /dailytime/search:
+    post:
+      tags:
+        - DailyTime
+      summary: Search for DailyTime entries
+      description: Search for DailyTime entries based on specific conditions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  description: The date to search for in `mm-dd-yyyy` format. If omitted, the current date is used.
+                conditions:
+                  type: array
+                  description: A list of conditions to filter the results.
+                  items:
+                    type: object
+                    properties:
+                      condition:
+                        type: string
+                        description: The condition to apply (e.g., `eq`, `lt`, `gt`, `le`, `ge`, `ne`, `like`).
+                      value:
+                        type: integer
+                        description: The value to compare against.
+                limit:
+                  type: integer
+                  description: The maximum number of records to return.
+              required:
+                - conditions
+      responses:
+        '200':
+          description: A list of DailyTime records matching the search criteria.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DailyTime'
+        '400':
+          description: Invalid request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /dailytoken/{user_id}:
+    get:
+      tags:
+        - DailyToken
+      summary: Get DailyToken by user ID
+      description: Retrieve the daily token entry for the provided user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose daily token is to be retrieved.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested DailyToken record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyToken'
+        '404':
+          description: DailyToken not found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /dailytoken:
+    post:
+      tags:
+        - DailyToken
+      summary: Create or update a DailyToken entry
+      description: Set the daily token entry using the provided user ID and date_time in the request body. Can be used to create or update the entry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DailyToken'
+      responses:
+        '200':
+          description: DailyToken updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyToken'
+        '201':
+          description: DailyToken created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyToken'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  
+  /kanban:
+    post:
+      tags:
+        - Kanban
+      summary: Create a new Kanban item
+      description: Creates a Kanban item with a default column of "todo". The request body requires `user_id` and `item_name`. Optional fields include `priority_number`, `tag_name`, and `velocity`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kanban'
+      responses:
+        '201':
+          description: Kanban item created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kanban'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /kanban/user/{user_id}:
+    get:
+      tags:
+        - Kanban
+      summary: Get Kanban items by user ID
+      description: Retrieves Kanban items for the specified user ID, grouped by their column (`todo`, `doing`, `done`).
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose Kanban items are to be retrieved.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested Kanban items grouped by column.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  id:
-                    type: string
-                  name:
-                    type: string
-                    example: "John Doe"
+                  todo:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kanban'
+                  doing:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kanban'
+                  done:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kanban'
         '404':
-          description: User not found
+          description: No Kanban items found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Kanban
+      summary: Delete completed Kanban items
+      description: Deletes all completed Kanban items (items in the `done` column) for the specified user.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose completed Kanban items are to be deleted.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Completed Kanban items deleted successfully.
+        '404':
+          description: No completed Kanban items found for this user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /kanban/{id}:
+    post:
+      tags:
+        - Kanban
+      summary: Move Kanban item to another column
+      description: Moves the Kanban item to the next column or to a specified column (`todo`, `doing`, or `done`). Requires `user_id` in the request body for verification.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Kanban item to be moved.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: The ID of the user attempting to move the Kanban item.
+                column:
+                  type: string
+                  description: The target column for the Kanban item.
+      responses:
+        '200':
+          description: Kanban item moved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kanban'
+        '400':
+          description: Invalid column name or validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have permission to move this Kanban item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Kanban item not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      tags:
+        - Kanban
+      summary: Update Kanban item details
+      description: Partially updates a Kanban item based on the provided fields. Requires `user_id` in the request body for verification.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Kanban item to be updated.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: The ID of the user attempting to update the Kanban item.
+                item_name:
+                  type: string
+                  description: The new name of the Kanban item.
+                priority_number:
+                  type: integer
+                  description: The new priority number of the Kanban item.
+                tag_name:
+                  type: string
+                  description: The new tag name of the Kanban item.
+                velocity:
+                  type: string
+                  description: The new velocity of the Kanban item.
+      responses:
+        '200':
+          description: Kanban item updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kanban'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have permission to update this Kanban item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Kanban item not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /kanban/user/{user_id}/{id}:
+    delete:
+      tags:
+        - Kanban
+      summary: Delete a Kanban item
+      description: Deletes the Kanban item with the given ID if the user owns it.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user attempting to delete the Kanban item.
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Kanban item to be deleted.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Kanban item deleted successfully.
+        '403':
+          description: User does not have permission to delete this Kanban item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Kanban item not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /kanban/user/{user_id}/tag/{tag_name}:
+    get:
+      tags:
+        - Kanban
+      summary: Get Kanban items by tag
+      description: Retrieves Kanban items for the specified user ID that match the given tag name, grouped by their column (`todo`, `doing`, `done`).
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose Kanban items are to be retrieved.
+          schema:
+            type: integer
+        - name: tag_name
+          in: path
+          required: true
+          description: The tag name to filter the Kanban items.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The requested Kanban items grouped by column.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  todo:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kanban'
+                  doing:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kanban'
+                  done:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kanban'
+        '404':
+          description: No Kanban items found for the specified user and tag name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /monthtime:
+    get:
+      tags:
+        - MonthTime
+      summary: Get MonthTime by primary key
+      description: Retrieve a MonthTime record using its full composite primary key (`user_id`, `mth`, `yr`).
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+        - name: mth
+          in: query
+          required: true
+          description: The month.
+          schema:
+            type: integer
+        - name: yr
+          in: query
+          required: true
+          description: The year.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested MonthTime record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthTime'
+        '400':
+          description: Missing required query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: MonthTime record not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - MonthTime
+      summary: Create a new MonthTime entry
+      description: Create a new MonthTime entry for a specific user and month/year combination.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonthTime'
+      responses:
+        '201':
+          description: MonthTime record created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthTime'
+        '400':
+          description: MonthTime record already exists or validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /monthtime/{user_id}:
+    get:
+      tags:
+        - MonthTime
+      summary: Get current month's MonthTime entry by user ID
+      description: Retrieve the current month's MonthTime entry for the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The MonthTime record for the current month.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthTime'
+        '404':
+          description: No MonthTime record found for the current month.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - MonthTime
+      summary: Create a new MonthTime entry for the current month
+      description: Create a new MonthTime entry for the current month for the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: MonthTime record created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthTime'
+        '400':
+          description: MonthTime record for the current month already exists or validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      tags:
+        - MonthTime
+      summary: Update stime for the current month
+      description: Update the stime value of the current month's MonthTime entry for the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stime:
+                  type: integer
+                  description: The amount of stime to add.
+              required:
+                - stime
+      responses:
+        '200':
+          description: MonthTime stime updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthTime'
+        '400':
+          description: Missing required field stime.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No MonthTime record found for the current month.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - MonthTime
+      summary: Delete all MonthTime entries for a user
+      description: Delete all MonthTime entries associated with the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose MonthTime entries are to be deleted.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: All MonthTime records deleted successfully.
+        '404':
+          description: No MonthTime records found for the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /monthtime/search:
+    post:
+      tags:
+        - MonthTime
+      summary: Search for MonthTime entries
+      description: Search for MonthTime entries based on specific conditions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  description: The date to search for in `mm-yyyy` format. If omitted, the current date is used.
+                conditions:
+                  type: array
+                  description: A list of conditions to filter the results.
+                  items:
+                    type: object
+                    properties:
+                      condition:
+                        type: string
+                        description: The condition to apply (e.g., `eq`, `lt`, `gt`, `le`, `ge`, `ne`, `like`).
+                      value:
+                        type: integer
+                        description: The value to compare against.
+                limit:
+                  type: integer
+                  description: The maximum number of records to return.
+              required:
+                - conditions
+      responses:
+        '200':
+          description: A list of MonthTime records matching the search criteria.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MonthTime'
+        '400':
+          description: Invalid request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /rb/{user_id}:
+    get:
+      tags:
+        - Rogue Boss
+      summary: Get Rogue Boss User by user ID
+      description: Retrieve the Rogue Boss User by the provided user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested Rogue Boss User.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RogueBossUser'
+        '404':
+          description: Rogue Boss User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      tags:
+        - Rogue Boss
+      summary: Update Rogue Boss User
+      description: Partially updates a Rogue Boss User's fields (`rbtype`, `model`, `purchased_models`) for the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RogueBossUser'
+      responses:
+        '200':
+          description: Rogue Boss User updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RogueBossUser'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Rogue Boss User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Rogue Boss
+      summary: Delete Rogue Boss User
+      description: Deletes the Rogue Boss User by the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Rogue Boss User deleted successfully.
+        '404':
+          description: Rogue Boss User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /rb:
+    post:
+      tags:
+        - Rogue Boss
+      summary: Create a Rogue Boss User
+      description: Create a new Rogue Boss User with the specified user ID and `rbtype`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RogueBossUser'
+      responses:
+        '201':
+          description: Rogue Boss User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RogueBossUser'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /rb/{user_id}/xp:
+    patch:
+      tags:
+        - Rogue Boss
+      summary: Add XP to Rogue Boss User
+      description: Adds XP to the Rogue Boss User with the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                xp:
+                  type: integer
+                  description: The amount of XP to add.
+              required:
+                - xp
+      responses:
+        '200':
+          description: Rogue Boss User XP updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RogueBossUser'
+        '400':
+          description: Invalid or missing XP value.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Rogue Boss User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /rb/top:
+    get:
+      tags:
+        - Rogue Boss
+      summary: Get top Rogue Boss Users
+      description: Retrieve the top Rogue Boss Users based on XP. The `limit` query parameter controls how many users are returned (default is 10).
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: The maximum number of top users to return.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The top Rogue Boss Users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RogueBossUser'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /streak/{user_id}:
+    post:
+      tags:
+        - Streak
+      summary: Set or update user streak
+      description: Creates or updates a user streak. If the streak does not exist, it will be created. If it exists, the streak will be updated based on the current date and the previous connection date.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Streak created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Streak'
+        '200':
+          description: Streak updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Streak'
+        '404':
+          description: Streak not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Streak
+      summary: Get user streak
+      description: Retrieve the streak information for a specific user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested streak information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Streak'
+        '404':
+          description: Streak not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /streak/search:
+    post:
+      tags:
+        - Streak
+      summary: Search for streaks
+      description: Searches for streaks based on the `search_field` provided in the request body, which can be either `highest_streak_achieved` or `current_streak`. Optionally, a `limit` can be provided to restrict the number of results returned.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                search_field:
+                  type: string
+                  description: The field to search by, either `highest_streak_achieved` or `current_streak`.
+                  example: "highest_streak_achieved"
+                limit:
+                  type: integer
+                  description: The maximum number of results to return.
+                  example: 10
+              required:
+                - search_field
+      responses:
+        '200':
+          description: A list of streaks matching the search criteria.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Streak'
+        '400':
+          description: Invalid search_field or request data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No streaks found matching the criteria.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /todo/incomplete/{user_id}:
+    get:
+      tags:
+        - Todo
+      summary: Get incomplete todo items
+      description: Retrieve all incomplete todo items for the specified user where the `completed_date` is null.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of incomplete todo items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+        '404':
+          description: No incomplete todo items found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/complete/{user_id}:
+    get:
+      tags:
+        - Todo
+      summary: Get complete todo items
+      description: Retrieve all complete todo items for the specified user where the `completed_date` is not null.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of complete todo items.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+        '404':
+          description: No complete todo items found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo:
+    post:
+      tags:
+        - Todo
+      summary: Create a new todo item
+      description: Create a new todo item for the specified user with the provided `item_name`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      responses:
+        '201':
+          description: Todo item created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/{id}:
+    delete:
+      tags:
+        - Todo
+      summary: Delete a todo item
+      description: Delete a todo item by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the todo item.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Todo item deleted successfully.
+        '404':
+          description: Todo item not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/{id}/update-name:
+    patch:
+      tags:
+        - Todo
+      summary: Update a todo item name
+      description: Update the name of a todo item by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the todo item.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_name:
+                  type: string
+                  description: The new name for the todo item.
+                  example: "New Todo Name"
+              required:
+                - item_name
+      responses:
+        '200':
+          description: Todo item name updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '400':
+          description: Invalid or missing `item_name` value.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Todo item not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/{id}/complete:
+    post:
+      tags:
+        - Todo
+      summary: Mark a todo item as complete
+      description: Set the `completed_date` for a todo item to the current date.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the todo item.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Todo item marked as complete.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+        '404':
+          description: Todo item not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/complete/{user_id}/delete-old:
+    delete:
+      tags:
+        - Todo
+      summary: Delete old completed todo items
+      description: Delete all completed todo items for the specified user that are older than one day.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Old completed todo items deleted successfully.
+        '404':
+          description: No old completed todo items found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todo/all/{user_id}:
+    delete:
+      tags:
+        - Todo
+      summary: Delete all todo items for a user
+      description: Delete all todo items associated with the specified user ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: All todo items deleted successfully.
+        '404':
+          description: No todo items found for the user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /trivia:
+    get:
+      tags:
+        - Trivia
+      summary: Get a random trivia question
+      description: Retrieve a random trivia question from the database.
+      responses:
+        '200':
+          description: A random trivia question.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TriviaQuestion'
+        '404':
+          description: No trivia questions found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Trivia
+      summary: Create a new trivia question
+      description: Create a new trivia question using the provided request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriviaQuestion'
+      responses:
+        '201':
+          description: Trivia question created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TriviaQuestion'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /trivia/{id}:
+    get:
+      tags:
+        - Trivia
+      summary: Get a trivia question by ID
+      description: Retrieve a trivia question using the provided ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the trivia question.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested trivia question.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TriviaQuestion'
+        '404':
+          description: Trivia question not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Trivia
+      summary: Overwrite a trivia question by ID
+      description: Overwrite an existing trivia question using the provided ID and request body.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the trivia question.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriviaQuestion'
+      responses:
+        '200':
+          description: Trivia question updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TriviaQuestion'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Trivia question not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Trivia
+      summary: Delete a trivia question by ID
+      description: Delete a trivia question using the provided ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the trivia question.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Trivia question deleted successfully.
+        '404':
+          description: Trivia question not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /user/{id}:
+    get:
+      tags:
+        - User
+      summary: Get user by ID
+      description: Retrieve a user by the provided ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - User
+      summary: Update user by ID
+      description: Update an existing user using the provided ID and request body.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      tags:
+        - User
+      summary: Partially update user by ID
+      description: Partially update an existing user using the provided ID and request body.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - User
+      summary: Delete user by ID
+      description: Delete a user using the provided ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the user.
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: User deleted successfully.
+        '404':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user:
+    post:
+      tags:
+        - User
+      summary: Create a new user
+      description: Create a new user using the provided request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user/search:
+    post:
+      tags:
+        - User
+      summary: Search for users
+      description: Search for users based on the provided conditions in the request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                conditions:
+                  type: array
+                  description: A list of conditions to filter the users.
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                        description: The field to filter by (e.g., `stime`, `trivia`, `tokens`, `hex`).
+                      condition:
+                        type: string
+                        description: The condition to apply (e.g., `eq`, `lt`, `gt`, `le`, `ge`, `ne`, `like`).
+                      value:
+                        type: string
+                        description: The value to compare against.
+                sort_field:
+                  type: string
+                  description: The field to sort by (e.g., `stime`, `trivia`, `tokens`, `hex`).
+                  example: "stime"
+                limit:
+                  type: integer
+                  description: The maximum number of results to return.
+                  example: 10
+      responses:
+        '200':
+          description: A list of users matching the search criteria.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid search criteria or request data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No users found matching the criteria.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
+    Accomplishment:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: The ID of the user who accomplished this.
+        msg:
+          type: string
+          description: The message or description of the accomplishment.
+      required:
+        - user_id
+        - msg
+
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the achievement.
+        user_id:
+          type: integer
+          description: The ID of the user who achieved this.
+      required:
+        - id
+        - user_id
+        
+    DailyTime:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: The ID of the user.
+        d:
+          type: integer
+          description: The day of the month.
+        mth:
+          type: integer
+          description: The month.
+        yr:
+          type: integer
+          description: The year.
+        stime:
+          type: integer
+          description: The stime value for that day.
+      required:
+        - user_id
+        - d
+        - mth
+        - yr
+        - stime
+    
+    DailyToken:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: The ID of the user.
+        date_time:
+          type: string
+          format: date-time
+          description: The date and time associated with the daily token.
+      required:
+        - user_id
+    
+    Kanban:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The unique identifier of the Kanban item.
+        user_id:
+          type: integer
+          description: The ID of the user who owns this Kanban item.
+        item_name:
+          type: string
+          description: The name of the Kanban item.
+        column_name:
+          type: string
+          description: The column where the Kanban item is located (`todo`, `doing`, or `done`).
+        priority_number:
+          type: integer
+          description: The priority of the Kanban item.
+        tag_name:
+          type: string
+          description: The tag associated with the Kanban item.
+        velocity:
+          type: string
+          description: The velocity associated with the Kanban item.
+      required:
+        - user_id
+        - item_name
+        - column_name
+        
+    MonthTime:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: The ID of the user.
+        mth:
+          type: integer
+          description: The month.
+        yr:
+          type: integer
+          description: The year.
+        stime:
+          type: integer
+          description: The stime value for that month.
+      required:
+        - user_id
+        - mth
+        - yr
+        - stime
+        
+    RogueBossUser:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: The ID of the user.
+        rbtype:
+          type: string
+          description: The type of Rogue Boss user.
+        xp:
+          type: integer
+          description: The experience points of the Rogue Boss user.
+        model:
+          type: integer
+          description: The model type of the Rogue Boss user.
+        purchased_models:
+          type: string
+          description: The purchased models of the Rogue Boss user.
+      required:
+        - user_id
+        - rbtype
+        
+    Streak:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: The ID of the user.
+        current_streak:
+          type: integer
+          description: The current streak value.
+        previous_connection_date:
+          type: string
+          format: date
+          description: The date of the user's last connection.
+        highest_streak_achieved:
+          type: integer
+          description: The highest streak value achieved by the user.
+      required:
+        - user_id
+        - current_streak
+        - previous_connection_date
+        - highest_streak_achieved
+        
+    Todo:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the todo item.
+        user_id:
+          type: integer
+          description: The ID of the user associated with the todo item.
+        item_name:
+          type: string
+          description: The name of the todo item.
+        completed_date:
+          type: string
+          format: date
+          description: The date when the todo item was completed.
+      required:
+        - user_id
+        - item_name
+        
+    TriviaQuestion:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the trivia question.
+        title:
+          type: string
+          description: The title or main question of the trivia.
+        option_a:
+          type: string
+          description: Option A for the trivia question.
+        option_b:
+          type: string
+          description: Option B for the trivia question.
+        option_c:
+          type: string
+          description: Option C for the trivia question.
+        option_d:
+          type: string
+          description: Option D for the trivia question.
+        correct:
+          type: integer
+          description: The correct option number (e.g., 1 for A, 2 for B).
+        author:
+          type: string
+          description: The author of the trivia question.
+        category:
+          type: string
+          description: The category to which the trivia question belongs.
+      required:
+        - title
+        - option_a
+        - option_b
+        - option_c
+        - option_d
+        - correct
+        - author
+        - category
+        
     User:
       type: object
       properties:
         id:
+          type: integer
+          description: The ID of the user.
+        tokens:
+          type: integer
+          description: The tokens associated with the user.
+        stime:
+          type: integer
+          description: The stime associated with the user.
+        hex:
           type: string
-        name:
+          description: The hex color code associated with the user.
+        trivia:
+          type: integer
+          description: The trivia score associated with the user.
+      required:
+        - id
+        - tokens
+        - stime
+
+    Error:
+      type: object
+      properties:
+        error:
           type: string
-          example: "John Doe"
+          description: A description of the error.
