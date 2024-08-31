@@ -9,7 +9,7 @@ permalink: /install/
 The official bot that runs this source code is found on the [narlock Discord server](https://discord.gg/eEbEYbXaNS). The Alder bot that runs on the narlock server is not open to join other servers. If you want to have the bot's functionality on your server or contribute to the main project, you will need to create and self host your own bot. The instructions below will show you how to run the Alder code for your own bot.
 
 ### Dependencies
-- [Python 3.10+](https://www.python.org/)
+- [Python 3.11+](https://www.python.org/)
 - [MySQL](https://www.mysql.com/) or [MariaDB](https://mariadb.org/)
 - [Alder API]() (Part of the AlderBot code repository)
 - [Discord API](https://discord.com/developers/docs/intro)
