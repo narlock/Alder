@@ -115,7 +115,8 @@ Hey @everyone !
 """
         for index, user in enumerate(top_3_users):
             # Add each user to the top month user message 
-            top_month_user_message += f'{PLACES[index]} <@{user['user_id']}>\n'
+            user_id = user['user_id']
+            top_month_user_message += f'{PLACES[index]} <@{user_id}>\n'
 
             # Give accomplishment to the top 3 users
             accomplishment_string = f'{PLACES[index]} Focus {cfg.MONTHS[month]} {year}'

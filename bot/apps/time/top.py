@@ -150,12 +150,13 @@ class Top():
                 avatar_url = self.get_top_url(member)
                 embed.set_thumbnail(url=f'{avatar_url}')
 
+            user_trivia = user['trivia']
             if index < 3:
                 # Add dedicated embed field if member is in first, second, or third place
-                embed.add_field(name=PLACES[index], value=f'**{username}** ({user['trivia']} correct answers)', inline=False)
+                embed.add_field(name=PLACES[index], value=f'**{username}** ({user_trivia} correct answers)', inline=False)
             else:
                 # Add honorable mention
-                honorable_mentions.append(f'**{username}** ({user['trivia']} correct answers)')
+                honorable_mentions.append(f'**{username}** ({user_trivia} correct answers)')
 
         # If there are honorable mentions, add them to the embed
         if honorable_mentions:
@@ -296,12 +297,13 @@ class Top():
                 avatar_url = self.get_top_url(member)
                 embed.set_thumbnail(url=f'{avatar_url}')
 
+            user_current_streak = user['current_streak']
             if index < 3:
                 # Add dedicated embed field if in first, second, or third place
-                embed.add_field(name=PLACES[index], value=f'**{username}** ({user['current_streak']} days)', inline=False)
+                embed.add_field(name=PLACES[index], value=f'**{username}** ({user_current_streak} days)', inline=False)
             else:
                 # Add honorable mention
-                honorable_mentions.append(f'**{username}** ({user['current_streak']} days)')
+                honorable_mentions.append(f'**{username}** ({user_current_streak} days)')
 
         # If there are honorable mentions, add them to the embed
         if honorable_mentions:
@@ -343,12 +345,13 @@ class Top():
                 avatar_url = self.get_top_url(member)
                 embed.set_thumbnail(url=f'{avatar_url}')
 
+            user_highest_streak = user['highest_streak_achieved']
             if index < 3:
                 # Add dedicated embed field if in first, second, or third place
-                embed.add_field(name=PLACES[index], value=f'**{username}** ({user['highest_streak_achieved']} days)', inline=False)
+                embed.add_field(name=PLACES[index], value=f'**{username}** ({user_highest_streak} days)', inline=False)
             else:
                 # Add honorable mention
-                honorable_mentions.append(f'**{username}** ({user['highest_streak_achieved']} days)')
+                honorable_mentions.append(f'**{username}** ({user_highest_streak} days)')
 
         # If there are honorable mentions, add them to the embed
         if honorable_mentions:

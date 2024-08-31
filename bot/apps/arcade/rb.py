@@ -132,7 +132,13 @@ class RogueBoss():
             embed.set_thumbnail(url=f'{interaction.user.avatar.url}')
         except Exception as e:
             embed.set_thumbnail(url=cfg.DISCORD_ALDER_IMAGE_URL)
-        embed.add_field(name='\u200b', value=f':small_blue_diamond: Type: {self.get_type_string(user['rbtype'])}\n:small_blue_diamond: Level: {self.calculate_level(user['xp'])}\n:small_blue_diamond: XP: {user['xp']}', inline=False)
+
+        # Setting rbtype, calculating level, and setting xp due to Python 3.11 limitations
+        rbtype = self.get_type_string(user['rbtype'])
+        xp = user['xp']
+        level = self.calculate_level(xp)
+
+        embed.add_field(name='\u200b', value=f':small_blue_diamond: Type: {rbtype}\n:small_blue_diamond: Level: {level}\n:small_blue_diamond: XP: {xp}', inline=False)
         embed.add_field(name='\u200b', value=cfg.EMBED_FOOTER_STRING, inline=False)
         return embed
 

@@ -2,10 +2,7 @@
 Alder main.py
 author: narlock
 
-The main runner of the Alder. This application will spin an instance of
-MySQLConnection (for connecting to the backend database), Bot (the actual
-Discord bot from discord.py), and each associated function dependency for
-the bot to operate.
+The main runner of the Alder.
 
 The usage of "calling user" refers to the user that issues the command
 on Discord.
@@ -641,7 +638,7 @@ async def rules(interaction: discord.Interaction):
 
     Utilizes /apps/info/rules.py to create embed for rules.
     """
-    Logger.info("INFO", "main.rules", f"Rules command received from {interaction.user.name} in {interaction.guild.name}")
+    Logger.info(f"Rules command received from {interaction.user.name} in {interaction.guild.name}")
     
     # Retrieve the rules channel for embed
     rules_channel = bot.get_channel(cfg.RULES_CHANNEL_ID)

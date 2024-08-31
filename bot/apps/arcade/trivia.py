@@ -20,7 +20,13 @@ class TriviaButtons(discord.ui.View):
 
         self.dbresponse = TriviaQuestionClient.get_random_trivia_question_contents()
         Logger.debug(f'Random trivia response: {self.dbresponse}')
-        self.question = f'**Category**: {self.dbresponse['category']}\n**By**: {self.dbresponse['author']}\n\n**{self.dbresponse['title']}**'
+
+        # set values before creating f-string (due to Python 3.11 limitations)
+        self.category = self.dbresponse['category']
+        self.author = self.dbresponse['author']
+        self.title = self.dbresponse['title']
+
+        self.question = f'**Category**: {self.category}\n**By**: {self.author}\n\n**{self.title}**'
         self.options = [self.dbresponse['option_a'], self.dbresponse['option_b'], self.dbresponse['option_c'], self.dbresponse['option_d']]
         self.correct = self.dbresponse['correct']
 
@@ -34,28 +40,28 @@ class TriviaButtons(discord.ui.View):
 
     @discord.ui.button(label='A', style=discord.ButtonStyle.blurple)
     async def option_a(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.embed.set_field_at(0, name='\u200b', value=f'**Category**: {self.dbresponse['category']}\n**By**: {self.dbresponse['author']}\n\nYou selected **A**', inline=False)
+        self.embed.set_field_at(0, name='\u200b', value=f'**Category**: {self.category}\n**By**: {self.author}\n\nYou selected **A**', inline=False)
         self.check_correct_answer(interaction, 0)
         self.clear_items()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
     @discord.ui.button(label='B', style=discord.ButtonStyle.blurple)
     async def option_b(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.embed.set_field_at(0, name='\u200b', value=f'**Category**: {self.dbresponse['category']}\n**By**: {self.dbresponse['author']}\n\nYou selected **B**', inline=False)
+        self.embed.set_field_at(0, name='\u200b', value=f'**Category**: {self.category}\n**By**: {self.author}\n\nYou selected **B**', inline=False)
         self.check_correct_answer(interaction, 1)
         self.clear_items()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
     @discord.ui.button(label='C', style=discord.ButtonStyle.blurple)
     async def option_c(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.embed.set_field_at(0, name='\u200b', value=f'**Category**: {self.dbresponse['category']}\n**By**: {self.dbresponse['author']}\n\nYou selected **C**', inline=False)
+        self.embed.set_field_at(0, name='\u200b', value=f'**Category**: {self.category}\n**By**: {self.author}\n\nYou selected **C**', inline=False)
         self.check_correct_answer(interaction, 2)
         self.clear_items()
         await interaction.response.edit_message(embed=self.embed, view=self)
 
     @discord.ui.button(label='D', style=discord.ButtonStyle.blurple)
     async def option_d(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.embed.set_field_at(0, name='\u200b', value=f'**Category**: {self.dbresponse['category']}\n**By**: {self.dbresponse['author']}\n\nYou selected **D**', inline=False)
+        self.embed.set_field_at(0, name='\u200b', value=f'**Category**: {self.category}\n**By**: {self.author}\n\nYou selected **D**', inline=False)
         self.check_correct_answer(interaction, 3)
         self.clear_items()
         await interaction.response.edit_message(embed=self.embed, view=self)
