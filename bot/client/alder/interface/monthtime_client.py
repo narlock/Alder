@@ -51,7 +51,7 @@ class MonthTimeClient():
         Retrieves the month time entry for the user for the
         current month.
         """
-        return AlderAPIClient.get(f'/dailytime/{user_id}')
+        return AlderAPIClient.get(f'/monthtime/{user_id}')
     
     @staticmethod
     def get_monthtime_for_user_specific_date(user_id: int, month: int, year: int):
