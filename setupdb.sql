@@ -9,6 +9,7 @@ CREATE TABLE user(
     id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
     tokens INT UNSIGNED NOT NULL,
     stime BIGINT UNSIGNED NOT NULL,
+    timezone VARCHAR(100) NOT NULL DEFAULT 'UTC',
     hex VARCHAR(7),
     trivia INT UNSIGNED
 );
@@ -110,6 +111,21 @@ CREATE TABLE kanban (
     tag_name VARCHAR(50),
     velocity INT,
     FOREIGN KEY (user_id) REFERENCES user(id)
+);
+
+DROP TABLE IF EXISTS `reminder`;
+CREATE TABLE reminder (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    remind_at DATETIME NOT NULL,
+    repeat_interval VARCHAR(50), -- e.g., 'daily', 'weekly', 'monthly', 'yearly', or a custom like: 'every_other_day', 'every_monday', 'every_tuesday', 'every_wednesday', 'every_thursday', 'every_friday', 'every_saturday', 'every_sunday', or combination of 'mtwhfsu'
+    repeat_until DATETIME, -- The date until which the reminder should repeat, NULL means indefinitely
+    repeat_count INT UNSIGNED, -- The number of times to repeat, NULL for indefinite or repeat until a specific date
+    created_at DATETIME,
+    updated_at DATETIME,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
 -- Insert sample data

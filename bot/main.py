@@ -329,6 +329,16 @@ async def resetmonth(ctx: commands.Context):
         await ctx.send("LOL! :rofl:")
         Logger.warn(f"Reset Month attempt failure. User {ctx.author.name} has insufficient permissions.")
 
+@bot.command(name='dmtest')
+async def dmtest(ctx: commands.Context):
+    """
+    test
+    """
+    try:
+        await ctx.author.send("Hello")
+    except discord.Forbidden:
+        await ctx.send('forbidden')
+
 ##########################################
 ##########################################
 # Voice Events
@@ -467,6 +477,17 @@ async def top(interaction: discord.Interaction, board: str = None):
 
     # Send the embed in response to the interaction
     await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name='timezone', description='Change your timezone')
+async def timezone(interaction: discord.Interaction, timezone: str):
+    """
+    /timezone {timezone_string}
+
+    Sets the timezone of the user to the {timezone_string} parameter.
+    Currently, timezone is only used for the reminders application.
+    """
+    embed = timezone_app.set_timezone(interaction, timezone)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 # ##########################################
 # ##########################################
