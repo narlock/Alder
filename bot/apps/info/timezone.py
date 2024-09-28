@@ -13,10 +13,12 @@ from datetime import datetime
 from client.alder.interface.user_client import UserClient
 
 class TimeZoneApp():
-    def set_timezone(self, interaction: discord.Interaction, timezone: str):
+    @staticmethod
+    def set_timezone(interaction: discord.Interaction, timezone: str):
         """
         Sets the user's timezone.
         """
+        UserClient.create_user_if_dne(interaction.user.id)
 
         # Validate the timezone string
         try:
@@ -27,7 +29,11 @@ class TimeZoneApp():
         
         # The timezone string is valid. Set it
         try:
-            UserClient.set_timezone(interaction.user.id, timezone)
+            response = UserClient.set_timezone(interaction.user.id, timezone)
+            
+            if response is None:
+                raise Exception
+            
             embed = discord.Embed(title=f'Timezone Changed', color=0xffa500)
             embed.add_field(name='\u200b', value=f'Your timezone has been updated to {timezone}.', inline=False)
             embed.add_field(name='\u200b', value=cfg.EMBED_FOOTER_STRING, inline=False)

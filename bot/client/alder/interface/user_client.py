@@ -103,6 +103,10 @@ class UserClient():
 
         # Perform set timezone operation
         response = AlderAPIClient.put(f"/user/{id}/timezone", request_body)
+
+        if not response or response.status_code == 404:
+            return None
+        
         return json.loads(response.text)
     
     # =====================

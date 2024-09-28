@@ -14,16 +14,19 @@ import cfg
 # Time for tracking how long an operation takes
 import time
 
+import pytz
+
 # Python dependencies
 import re
 import traceback
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 # API clients
 from client.alder.interface.user_client import UserClient
 from client.alder.interface.accomplishment_client import AccomplishmentClient
 from client.alder.interface.rogueboss_client import RbClient
 from client.alder.interface.dailytoken_client import DailyTokenClient
+from client.alder.interface.reminder_client import ReminderClient
 
 # Discord dependencies
 import discord
@@ -55,6 +58,7 @@ from apps.info.help import HelpPageTurner
 from apps.info.rules import Rules
 from apps.info.stats import Stats
 from apps.info.achievement import Achievements
+from apps.info.timezone import TimeZoneApp
 
 # Arcade application dependencies
 from apps.arcade.trivia import Trivia
@@ -161,6 +165,10 @@ async def on_ready():
     # Begin scheduled tasks
     sync_time_track.start()
 
+    # Check for reminders
+    await load_all_reminders()
+    check_reminders.start()
+
     # Indicate on_ready is complete
     Logger.success('AlderBot is officially ready for use!')
     # End and log execution time for the command
@@ -190,9 +198,8 @@ async def on_guild_join(guild):
 # Scheduled events
 ##########################################
 ##########################################
-# stored_utc_month = datetime.now(timezone.utc).month
-stored_utc_month = datetime.now(timezone.utc).month
-stored_utc_year = datetime.now(timezone.utc).year
+stored_utc_month = datetime.now(pytz.utc).month
+stored_utc_year = datetime.now(pytz.utc).year
 
 @tasks.loop(minutes=15)
 async def sync_time_track():
@@ -209,8 +216,8 @@ async def sync_time_track():
         time_tracker.update_connected_users(guild)
 
         # Check for month reset
-        current_utc_month = datetime.now(timezone.utc).month
-        current_utc_year = datetime.now(timezone.utc).year
+        current_utc_month = datetime.now(pytz.utc).month
+        current_utc_year = datetime.now(pytz.utc).year
         if(stored_utc_month != current_utc_month):
             # If the stored month is not the current month, perform reset           
             Logger.debug(f'Performing month reset...') 
@@ -328,16 +335,6 @@ async def resetmonth(ctx: commands.Context):
     else:
         await ctx.send("LOL! :rofl:")
         Logger.warn(f"Reset Month attempt failure. User {ctx.author.name} has insufficient permissions.")
-
-@bot.command(name='dmtest')
-async def dmtest(ctx: commands.Context):
-    """
-    test
-    """
-    try:
-        await ctx.author.send("Hello")
-    except discord.Forbidden:
-        await ctx.send('forbidden')
 
 ##########################################
 ##########################################
@@ -479,14 +476,15 @@ async def top(interaction: discord.Interaction, board: str = None):
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name='timezone', description='Change your timezone')
-async def timezone(interaction: discord.Interaction, timezone: str):
+async def timezone(interaction: discord.Interaction, timezone_string: str):
     """
     /timezone {timezone_string}
 
     Sets the timezone of the user to the {timezone_string} parameter.
     Currently, timezone is only used for the reminders application.
     """
-    embed = timezone_app.set_timezone(interaction, timezone)
+    Logger.info(f'{interaction.user.id} calling timezone with timezone of {timezone_string}')
+    embed = TimeZoneApp.set_timezone(interaction, timezone_string)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 # ##########################################
@@ -1037,6 +1035,105 @@ async def kanban(interaction: discord.Interaction, command: str=None):
         Logger.debug('Adding the kanban item to user\'s board')
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+@bot.tree.command(name="reminders", description="Manage and view your reminders")
+async def reminders(
+    interaction: discord.Interaction, 
+    title: str = None, 
+    remind_date: str = None, 
+    remind_time: str = None, 
+    repeat_interval: str = None
+):
+    global reminders_dict  # Use the global reminders_dict to store reminders
+
+    user_id = interaction.user.id
+
+    # Case 1: Display reminders if no parameters are provided
+    if not title and not remind_date and not remind_time:
+        # Call ReminderClient.get_user_reminders to get the user's reminders
+        reminders = ReminderClient.get_user_reminders(user_id)
+
+        # Check if reminders are present and send them as an embed response
+        if reminders:
+            # Create an embed with a clock emoji and title
+            embed = discord.Embed(title=":clock: Reminders", color=discord.Color.blue())
+
+            # Add a field for each reminder in the list, where each reminder has a single field
+            for reminder in reminders:
+                # Extract information for each reminder
+                reminder_id = reminder.get('id')
+                title = reminder.get('title')
+                remind_at = reminder.get('remind_at')
+
+                # Parse remind_at to get date and time separately
+                try:
+                    remind_at_datetime = datetime.fromisoformat(remind_at)
+                    remind_date_str = remind_at_datetime.strftime("%Y-%m-%d")  # Format: YYYY-MM-DD
+                    remind_time_str = remind_at_datetime.strftime("%H:%M:%S")  # Format: HH:MM:SS
+                except ValueError:
+                    remind_date_str = remind_at
+                    remind_time_str = ""
+
+                # Optional fields
+                repeat_interval = reminder.get('repeat_interval', 'None')
+                repeat_until = reminder.get('repeat_until', 'None')
+                repeat_count = reminder.get('repeat_count', 'None')
+
+                # Construct the reminder details message - all details on a single field
+                reminder_details = (
+                    f"[**{reminder_id}**] \"{title}\" Next: **{remind_date_str}** at **{remind_time_str}**. Repeats: {repeat_interval}"
+                )
+
+                # Add a field to the embed for this reminder, all details in one field
+                embed.add_field(name='\u200b', value=reminder_details, inline=False)
+
+            # Send the embed as a response
+            embed.add_field(name='\u200b', value=cfg.EMBED_FOOTER_STRING, inline=False)
+            await interaction.response.send_message(embed=embed)
+        else:
+            await interaction.response.send_message("You have no reminders.")
+
+    # Case 2: Create a new reminder if title, remind_date, and remind_time are provided
+    elif title and remind_date and remind_time:
+        # Validate the remind_date and remind_time format (Optional validation)
+        try:
+            datetime.strptime(remind_date, "%Y-%m-%d")
+            datetime.strptime(remind_time, "%H:%M")
+        except ValueError:
+            await interaction.response.send_message("Invalid date or time format. Please use YYYY-MM-DD for date and HH:MM for time.")
+            return
+
+        # Combine remind_date and remind_time into an ISO 8601 string
+        remind_at = f"{remind_date}T{remind_time}:00"  # Example: "2024-09-22T10:00:00"
+
+        # Call ReminderClient.create_reminder to create the new reminder
+        new_reminder = ReminderClient.create_reminder(
+            user_id=user_id,
+            title=title,
+            remind_at=remind_at,  # Pass the ISO 8601 formatted string
+            repeat_interval=repeat_interval
+        )
+
+        # If the reminder was successfully created, add it to the global reminders_dict
+        if new_reminder:
+            # Parse remind_at into a datetime object with UTC timezone
+            remind_at_dt = datetime.strptime(remind_at, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.utc)
+
+            # Add the new reminder to the global dictionary
+            reminders_dict[new_reminder['id']] = {
+                'user_id': user_id,
+                'title': title,
+                'remind_at': remind_at_dt,  # Store as datetime object for easy comparisons
+                'repeat_interval': repeat_interval
+            }
+
+            await interaction.response.send_message(f"Reminder '{title}' created successfully and added to the global reminder list!")
+        else:
+            await interaction.response.send_message("Failed to create the reminder. Please try again later.")
+    
+    # Case 3: If some required fields for creating a reminder are missing, show an error
+    else:
+        await interaction.response.send_message("To create a reminder, you must include the title, remind_date (YYYY-MM-DD), and remind_time (HH:MM).")
+
 # ##########################################
 # ##########################################
 # # Sponsor commands
@@ -1143,6 +1240,124 @@ async def daily(interaction: discord.Interaction):
         embed.add_field(name='\u200b', value=f'**Boosters** can receive `25` tokens daily,\n**Supporters** can receive `50` tokens daily,\nand users with __both__ roles can receive `75` tokens daily!', inline=False)
         embed.add_field(name='\u200b', value=cfg.EMBED_FOOTER_STRING, inline=False)
         await interaction.response.send_message(embed=embed)
+
+
+# ##########################################
+# ##########################################
+# Reminders functionality
+# TODO split this apart if possible
+# ##########################################
+# ##########################################
+
+# Store reminders in a dictionary for in-memory access
+reminders_dict = {}
+
+async def load_all_reminders():
+    """
+    Load all reminders from the API and store them in an in-memory dictionary.
+    """
+    global reminders_dict
+
+    # Fetch all reminders using the ReminderClient
+    all_reminders = ReminderClient.get_all_reminders()
+    
+    if all_reminders:
+        for reminder in all_reminders:
+            # Parse the remind_at field to a datetime object in UTC
+            remind_at = datetime.strptime(reminder['remind_at'], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.utc)
+            reminders_dict[reminder['id']] = {
+                'user_id': reminder['user_id'],
+                'title': reminder['title'],
+                'remind_at': remind_at,
+                'repeat_interval': reminder.get('repeat_interval')
+            }
+
+        print(f"Loaded {len(reminders_dict)} reminders.")
+    else:
+        print("No reminders found.")
+
+@tasks.loop(seconds=60)
+async def check_reminders():
+    """
+    Periodically checks if any reminders are due and sends a direct message.
+    Updates the next reminder time in the dictionary and the database if the reminder repeats.
+    """
+    Logger.info(f'Checking reminders...{len(reminders_dict)} in dictionary.')
+    current_time = datetime.now(pytz.utc)  # Get the current UTC time
+
+    for reminder_id, reminder in list(reminders_dict.items()):
+        remind_at = reminder['remind_at']
+
+        # Check if it's time to send the reminder
+        if remind_at <= current_time:
+            try:
+                # Get the user object using the user_id
+                user = await bot.fetch_user(reminder['user_id'])
+
+                if user:
+                    # Send the reminder message to the user
+                    await user.send(f"Reminder: {reminder['title']}")
+
+                    # Handle repeated reminders if necessary
+                    if reminder['repeat_interval']:
+                        # Calculate the next reminder time based on the repeat_interval
+                        next_remind_at = get_next_reminder_time(remind_at, reminder['repeat_interval'])
+
+                        # Update the dictionary with the new remind_at time
+                        reminders_dict[reminder_id]['remind_at'] = next_remind_at
+
+                        # Extract only the date part of the new remind_at datetime (e.g., "2024-10-01")
+                        new_remind_date_str = next_remind_at.strftime("%Y-%m-%d")
+
+                        # Update the reminder in the database using ReminderClient
+                        updated_reminder = ReminderClient.update_reminder_date(reminder_id, new_remind_date_str)
+                        if updated_reminder:
+                            Logger.info(f"Updated reminder {reminder_id} in the database with new remind_at date: {new_remind_date_str}")
+                        else:
+                            Logger.error(f"Failed to update reminder {reminder_id} in the database.")
+                    else:
+                        # Remove the reminder from the dictionary if it doesn't repeat
+                        del reminders_dict[reminder_id]
+
+                        # Delete the reminder from the database
+                        deleted = ReminderClient.delete_reminder_by_id(reminder_id)
+                        if deleted:
+                            Logger.info(f"Deleted non-repeating reminder {reminder_id} from the database.")
+                        else:
+                            Logger.error(f"Failed to delete reminder {reminder_id} from the database.")
+            except discord.errors.NotFound:
+                # If the user is not found, delete the reminder from the dictionary and database
+                del reminders_dict[reminder_id]
+
+                # Delete the reminder from the database
+                deleted = ReminderClient.delete_reminder_by_id(reminder_id)
+                if deleted:
+                    Logger.info(f"Deleted reminder {reminder_id} from the database due to user not found.")
+                else:
+                    Logger.error(f"Failed to delete reminder {reminder_id} from the database due to user not found.")
+            except Exception as e:
+                # Log any other unexpected exceptions
+                Logger.error(f"An unexpected error occurred: {str(e)}")
+                traceback.print_exc()
+
+# Helper function to calculate the next reminder time based on interval
+def get_next_reminder_time(current_time, repeat_interval):
+    """
+    Calculate the next reminder time based on the repeat_interval.
+    """
+    if repeat_interval == 'daily':
+        return current_time + timedelta(days=1)
+    elif repeat_interval == 'weekly':
+        return current_time + timedelta(weeks=1)
+    elif repeat_interval == 'monthly':
+        # Increment the month, taking care of year transition
+        new_month = current_time.month + 1 if current_time.month < 12 else 1
+        new_year = current_time.year if current_time.month < 12 else current_time.year + 1
+        return current_time.replace(year=new_year, month=new_month)
+    elif repeat_interval == 'yearly':
+        return current_time.replace(year=current_time.year + 1)
+    else:
+        return current_time
 
 # Starts AlderBot
 bot.run(cfg.TOKEN)

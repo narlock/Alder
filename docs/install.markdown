@@ -23,6 +23,7 @@ The official bot that runs this source code is found on the [narlock Discord ser
 - [PyMySQL](https://pypi.org/project/PyMySQL/)
 - [Flask-SQLAlchemy](https://pypi.org/project/Flask-SQLAlchemy/)
 - [marshmallow-sqlalchemy](https://pypi.org/project/marshmallow-sqlalchemy/)
+- [pytz](https://pypi.org/project/pytz/)
 
 ## Python
 This Discord bot is programmed using the [Python](https://www.python.org/) programming language. This means that if you wish to self host the bot for yourself or contribute to the bot's functionality, you will need to install Python.

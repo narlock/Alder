@@ -3,6 +3,8 @@ from app.model.reminder_model import ReminderModel
 from app.schema.reminder_schema import ReminderSchema
 from app import db
 
+from datetime import datetime
+
 # Define Reminder Blueprint
 reminder_bp = Blueprint('reminder_bp', __name__)
 
@@ -106,3 +108,53 @@ def delete_reminder(id):
 
     # Return 204 No Content status
     return '', 204
+
+@reminder_bp.route('/reminder/<int:id>/date', methods=['PUT'])
+def update_reminder_date(id):
+    """
+    Updates the remind_at date of a reminder using the given date string (YYYY-MM-DD).
+    The time component of the remind_at field will remain unchanged.
+    """
+    # Get the existing reminder by its ID
+    reminder = ReminderModel.query.get(id)
+
+    if reminder is None:
+        return jsonify({"message": "Reminder not found."}), 404
+
+    # Parse the incoming JSON data
+    data = request.get_json()
+    new_date_str = data.get('remind_at')
+
+    # Validate the date string
+    if not new_date_str:
+        return jsonify({"message": "The 'remind_at' date field is required."}), 400
+
+    try:
+        # Parse the new date from the string
+        new_date = datetime.strptime(new_date_str, "%Y-%m-%d")
+    except ValueError:
+        return jsonify({"message": "Invalid date format. Use 'YYYY-MM-DD'."}), 400
+
+    # Check if reminder.remind_at is a datetime object or string
+    if isinstance(reminder.remind_at, str):
+        try:
+            # Convert string to datetime if reminder.remind_at is in ISO 8601 format
+            current_remind_at = datetime.fromisoformat(reminder.remind_at)
+        except ValueError:
+            return jsonify({"message": "The existing remind_at field has an invalid format."}), 500
+    elif isinstance(reminder.remind_at, datetime):
+        current_remind_at = reminder.remind_at
+    else:
+        return jsonify({"message": "Unexpected format for remind_at field."}), 500
+
+    # Create a new remind_at datetime by combining the new date with the existing time
+    updated_remind_at = datetime.combine(new_date, current_remind_at.time())
+
+    # Update the remind_at field of the reminder
+    reminder.remind_at = updated_remind_at.isoformat()  # Convert back to ISO format string
+
+    # Commit the changes to the database
+    db.session.commit()
+
+    # Return the updated reminder
+    return jsonify(ReminderSchema().dump(reminder)), 200
