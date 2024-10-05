@@ -89,6 +89,26 @@ class UserClient():
         """
         return AlderAPIClient.delete(f'/user/{id}')
     
+    @staticmethod
+    def set_timezone(id: str, timezone: str):
+        """
+        Calls the set timezone endpoint which puts the
+        value of {timezone} parameter in the user with
+        {id} row.
+        """
+        # Construct request body
+        request_body = {
+            "timezone": timezone
+        }
+
+        # Perform set timezone operation
+        response = AlderAPIClient.put(f"/user/{id}/timezone", request_body)
+
+        if not response or response.status_code == 404:
+            return None
+        
+        return json.loads(response.text)
+    
     # =====================
     # HELPER FUNCTIONS
     # =====================

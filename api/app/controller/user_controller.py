@@ -110,6 +110,27 @@ def delete_user(id):
     # Return 204 No Content
     return '', 204
 
+# Set Timezone endpoint
+@user_bp.route('/user/<int:id>/timezone', methods=['PUT'])
+def set_user_timezone(id):
+    user = User.query.get(id)
+    if user is None:
+        return jsonify({'message': 'User not found'}), 404
+    
+    data = request.get_json()
+    
+    # Check if timezone is provided in the request body
+    if 'timezone' not in data:
+        return jsonify({'message': 'Timezone is required'}), 400
+
+    timezone = data['timezone']
+
+    # Update user's timezone if valid
+    user.timezone = timezone
+    db.session.commit()
+
+    return jsonify(user_schema.dump(user))
+
 # Search endpoint
 @user_bp.route('/user/search', methods=['POST'])
 def search_users():

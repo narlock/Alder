@@ -54,5 +54,9 @@ def create_app():
         # Register kanban controller
         from app.controller.kanban_controller import kanban_bp
         app.register_blueprint(kanban_bp)
+
+        # Register reminder controller
+        from app.controller.reminder_controller import reminder_bp
+        app.register_blueprint(reminder_bp)
     
     return app
