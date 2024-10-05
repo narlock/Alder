@@ -1035,6 +1035,50 @@ async def kanban(interaction: discord.Interaction, command: str=None):
         Logger.debug('Adding the kanban item to user\'s board')
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+@bot.tree.command(name="deletereminder", description="Delete an existing reminder")
+async def delete_reminder(interaction: discord.Interaction, reminder_id: str):
+    """
+    Using the reminder id and the interaction, delete the reminder for the
+    calling user.
+    """
+    global reminders_dict  # Use the global reminders_dict to store reminders
+
+    # Ensure that the reminder_id is an integer.
+    if not reminder_id_int.isdigit():
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="Invalid ID",
+                description="The provided reminder ID is not a valid number.",
+                color=discord.Color.red(),
+            ),
+            ephemeral=True,
+        )
+        return
+
+    reminder_id_int = int(reminder_id)
+    user_id = interaction.user.id
+
+    # Get the user's reminders to verify the reminder_id belongs to them.
+    user_reminders = ReminderClient.get_user_reminders(user_id)
+    if not user_reminders:
+        await interaction.response.send_message(embed=cfg.ErrorEmbed.message(f'No reminder found with {reminder_id_int}'), ephemeral=True)
+        return
+
+    # Check if the reminder_id exists in the user's reminders.
+    reminder_to_delete = next((reminder for reminder in user_reminders if reminder['id'] == reminder_id_int), None)
+    if not reminder_to_delete:
+        await interaction.response.send_message(embed=cfg.ErrorEmbed.message(f'No reminder found with {reminder_id_int}'), ephemeral=True)
+        return
+
+    # Try to delete the reminder via the ReminderClient.
+    delete_response = ReminderClient.delete_reminder_by_id(reminder_id_int)
+    if delete_response and delete_response.status_code == 204:
+        del reminders_dict[reminder_id]
+        await interaction.response.send_message(embed=discord.Embed(title="Reminder Deleted", description=f"Successfully deleted reminder with ID {reminder_id_int}.", color=discord.Color.green()), ephemeral=True)
+    else:
+        await interaction.response.send_message(embed=cfg.ErrorEmbed.message('An unexpected error ocurred when attempting to delete reminder'), ephemeral=True)
+
+
 @bot.tree.command(name="reminders", description="Manage and view your reminders")
 async def reminders(
     interaction: discord.Interaction, 
