@@ -30,6 +30,7 @@ from client.alder.interface.reminder_client import ReminderClient
 
 # Discord dependencies
 import discord
+from discord import app_commands
 from discord.ext import commands, tasks
 
 # Tool dependencies
@@ -475,17 +476,26 @@ async def top(interaction: discord.Interaction, board: str = None):
     # Send the embed in response to the interaction
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name='timezone', description='Change your timezone')
-async def timezone(interaction: discord.Interaction, timezone_string: str):
+@bot.tree.command(name='timezone', description='View or set your timezone')
+@app_commands.describe(
+    timezone_string="Set timezone value (e.g. America/New_York, Europe/London)"
+)
+async def timezone(interaction: discord.Interaction, timezone_string: str = None):
     """
     /timezone {timezone_string}
 
     Sets the timezone of the user to the {timezone_string} parameter.
     Currently, timezone is only used for the reminders application.
     """
-    Logger.info(f'{interaction.user.id} calling timezone with timezone of {timezone_string}')
-    embed = TimeZoneApp.set_timezone(interaction, timezone_string)
-    await interaction.response.send_message(embed=embed, ephemeral=True)
+    if timezone_string is None:
+        # Display current timezone
+        embed = TimeZoneApp.get_current_timezone_embed(interaction)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    else:
+        # Set timezone
+        Logger.info(f'{interaction.user.id} calling timezone with timezone of {timezone_string}')
+        embed = TimeZoneApp.set_timezone(interaction, timezone_string)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 # ##########################################
 # ##########################################
@@ -1080,6 +1090,12 @@ async def delete_reminder(interaction: discord.Interaction, reminder_id: str):
 
 
 @bot.tree.command(name="reminders", description="Manage and view your reminders")
+@app_commands.describe(
+    title="The title of the reminder", 
+    remind_date="The date for the reminder in YYYY-MM-DD format", 
+    remind_time="The time for the reminder in HH:MM format", 
+    repeat_interval="How often the reminder should repeat (daily, weekly, monthly, or yearly)"
+)
 async def reminders(
     interaction: discord.Interaction, 
     title: str = None, 
@@ -1111,8 +1127,17 @@ async def reminders(
                 # Parse remind_at to get date and time separately
                 try:
                     remind_at_datetime = datetime.fromisoformat(remind_at)
-                    remind_date_str = remind_at_datetime.strftime("%Y-%m-%d")  # Format: YYYY-MM-DD
-                    remind_time_str = remind_at_datetime.strftime("%H:%M:%S")  # Format: HH:MM:SS
+
+                    user_timezone = pytz.timezone(UserClient.get_timezone(interaction.user.id))
+                    # Mark remind_at_datetime as UTC
+                    remind_at_utc = pytz.utc.localize(remind_at_datetime)
+
+                    # Convert the UTC time to the user's local timezone
+                    remind_at_user_timezone = remind_at_utc.astimezone(user_timezone)
+
+                    # Format the date and time strings in the user's timezone
+                    remind_date_str = remind_at_user_timezone.strftime("%Y-%m-%d")  # Format: YYYY-MM-DD
+                    remind_time_str = remind_at_user_timezone.strftime("%H:%M:%S")  # Format: HH:MM:SS
                 except ValueError:
                     remind_date_str = remind_at
                     remind_time_str = ""
@@ -1132,9 +1157,9 @@ async def reminders(
 
             # Send the embed as a response
             embed.add_field(name='\u200b', value=cfg.EMBED_FOOTER_STRING, inline=False)
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
-            await interaction.response.send_message("You have no reminders.")
+            await interaction.response.send_message("You have no reminders.", ephemeral=True)
 
     # Case 2: Create a new reminder if title, remind_date, and remind_time are provided
     elif title and remind_date and remind_time:
@@ -1143,40 +1168,48 @@ async def reminders(
             datetime.strptime(remind_date, "%Y-%m-%d")
             datetime.strptime(remind_time, "%H:%M")
         except ValueError:
-            await interaction.response.send_message("Invalid date or time format. Please use YYYY-MM-DD for date and HH:MM for time.")
+            await interaction.response.send_message("Invalid date or time format. Please use YYYY-MM-DD for date and HH:MM for time.", ephemeral=True)
             return
 
         # Combine remind_date and remind_time into an ISO 8601 string
-        remind_at = f"{remind_date}T{remind_time}:00"  # Example: "2024-09-22T10:00:00"
+        remind_at_local = f"{remind_date}T{remind_time}:00" # Example: "2024-09-22T10:00:00"
+        # remind_at will be in the timezone of the calling user. Let's retrieve their
+        # timezone from the UserClient, then convert remind_at to be in UTC time.
+        user_timezone_string = UserClient.get_timezone(interaction.user.id)
+        user_timezone = pytz.timezone(user_timezone_string)
+        # Localize remind_at to the user's timezone
+        remind_at_local_dt = datetime.strptime(remind_at_local, "%Y-%m-%dT%H:%M:%S")
+        remind_at_with_tz = user_timezone.localize(remind_at_local_dt)
+        # Convert localized time to UTC
+        remind_at_utc = remind_at_with_tz.astimezone(pytz.utc)
+        remind_at_formatted = remind_at_utc.strftime("%Y-%m-%dT%H:%M:00")
+        print(remind_at_formatted)
 
         # Call ReminderClient.create_reminder to create the new reminder
         new_reminder = ReminderClient.create_reminder(
             user_id=user_id,
             title=title,
-            remind_at=remind_at,  # Pass the ISO 8601 formatted string
+            remind_at=remind_at_formatted,  # Pass the ISO 8601 formatted string
             repeat_interval=repeat_interval
         )
 
         # If the reminder was successfully created, add it to the global reminders_dict
         if new_reminder:
-            # Parse remind_at into a datetime object with UTC timezone
-            remind_at_dt = datetime.strptime(remind_at, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=pytz.utc)
-
             # Add the new reminder to the global dictionary
             reminders_dict[new_reminder['id']] = {
                 'user_id': user_id,
                 'title': title,
-                'remind_at': remind_at_dt,  # Store as datetime object for easy comparisons
+                'remind_at': remind_at_utc,  # Store as datetime object for easy comparisons
                 'repeat_interval': repeat_interval
             }
 
-            await interaction.response.send_message(f"Reminder '{title}' created successfully and added to the global reminder list!")
+            await interaction.response.send_message(f"Reminder '{title}' created successfully and added to the global reminder list!", ephemeral=True)
         else:
-            await interaction.response.send_message("Failed to create the reminder. Please try again later.")
+            await interaction.response.send_message("Failed to create the reminder. Please try again later.", ephemeral=True)
     
     # Case 3: If some required fields for creating a reminder are missing, show an error
     else:
-        await interaction.response.send_message("To create a reminder, you must include the title, remind_date (YYYY-MM-DD), and remind_time (HH:MM).")
+        await interaction.response.send_message("To create a reminder, you must include the title, remind_date (YYYY-MM-DD), and remind_time (HH:MM).", ephemeral=True)
 
 # ##########################################
 # ##########################################

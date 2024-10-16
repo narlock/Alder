@@ -109,6 +109,18 @@ class UserClient():
         
         return json.loads(response.text)
     
+    @staticmethod
+    def get_timezone(id: str):
+        """
+        Retrieves a user's timezone by their id.
+        """
+        user_profile = UserClient.get_user_profile(id)
+
+        if user_profile:
+            return user_profile['timezone']
+        
+        return None
+    
     # =====================
     # HELPER FUNCTIONS
     # =====================
