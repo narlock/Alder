@@ -1054,7 +1054,7 @@ async def delete_reminder(interaction: discord.Interaction, reminder_id: str):
     global reminders_dict  # Use the global reminders_dict to store reminders
 
     # Ensure that the reminder_id is an integer.
-    if not reminder_id_int.isdigit():
+    if not reminder_id.isdigit():
         await interaction.response.send_message(
             embed=discord.Embed(
                 title="Invalid ID",
@@ -1071,19 +1071,19 @@ async def delete_reminder(interaction: discord.Interaction, reminder_id: str):
     # Get the user's reminders to verify the reminder_id belongs to them.
     user_reminders = ReminderClient.get_user_reminders(user_id)
     if not user_reminders:
-        await interaction.response.send_message(embed=cfg.ErrorEmbed.message(f'No reminder found with {reminder_id_int}'), ephemeral=True)
+        await interaction.response.send_message(embed=cfg.ErrorEmbed.message(f'No reminder found with id {reminder_id_int}'), ephemeral=True)
         return
 
     # Check if the reminder_id exists in the user's reminders.
     reminder_to_delete = next((reminder for reminder in user_reminders if reminder['id'] == reminder_id_int), None)
     if not reminder_to_delete:
-        await interaction.response.send_message(embed=cfg.ErrorEmbed.message(f'No reminder found with {reminder_id_int}'), ephemeral=True)
+        await interaction.response.send_message(embed=cfg.ErrorEmbed.message(f'No reminder found with id {reminder_id_int}'), ephemeral=True)
         return
 
     # Try to delete the reminder via the ReminderClient.
     delete_response = ReminderClient.delete_reminder_by_id(reminder_id_int)
     if delete_response and delete_response.status_code == 204:
-        del reminders_dict[reminder_id]
+        del reminders_dict[reminder_id_int]
         await interaction.response.send_message(embed=discord.Embed(title="Reminder Deleted", description=f"Successfully deleted reminder with ID {reminder_id_int}.", color=discord.Color.green()), ephemeral=True)
     else:
         await interaction.response.send_message(embed=cfg.ErrorEmbed.message('An unexpected error ocurred when attempting to delete reminder'), ephemeral=True)
@@ -1106,6 +1106,7 @@ async def reminders(
     global reminders_dict  # Use the global reminders_dict to store reminders
 
     user_id = interaction.user.id
+    UserClient.create_user_if_dne(user_id)
 
     # Case 1: Display reminders if no parameters are provided
     if not title and not remind_date and not remind_time:
@@ -1360,6 +1361,9 @@ async def check_reminders():
     Updates the next reminder time in the dictionary and the database if the reminder repeats.
     """
     Logger.info(f'Checking reminders...{len(reminders_dict)} in dictionary.')
+    for key, value in reminders_dict.items():
+        Logger.debug(f'Reminder Key: {key}, Value: {value}')
+
     current_time = datetime.now(pytz.utc)  # Get the current UTC time
 
     for reminder_id, reminder in list(reminders_dict.items()):
