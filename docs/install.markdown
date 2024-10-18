@@ -106,7 +106,7 @@ SHOW TABLES;
 If configured correctly, the response for showing tables should appear as follows:
 
 ```
-mysql> SHOW TABLES;
+mysql> show tables;
 +-----------------+
 | Tables_in_alder |
 +-----------------+
@@ -117,12 +117,13 @@ mysql> SHOW TABLES;
 | kanban          |
 | monthtime       |
 | rbuser          |
+| reminder        |
 | streak          |
 | todo            |
 | triviaquestion  |
 | user            |
 +-----------------+
-11 rows in set (0.00 sec)
+12 rows in set (0.01 sec)
 ```
 
 ## Running the Bot
@@ -155,6 +156,7 @@ pip install Flask                         # required for Alder API
 pip install PyMySQL                       # required for Alder API
 pip install Flask-SQLAlchemy              # required for Alder API
 pip install marshmallow-sqlalchemy        # required for Alder API
+pip install pytz                          # required for handling timezone
 ```
 
 Once all of these are installed, we can now configure the applications.
@@ -227,6 +229,7 @@ The bot will begin to start up. The bot will perform the following tasks on star
 4. Sync the slash commands with Discord.
 5. Refresh role buttons in the role channel.
 6. Begin sync time tracking task loop.
+7. Load all existing reminders from database, then start the reminders task loop.
 
 Upon completion, you will see this message in your terminal log:
 

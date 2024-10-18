@@ -8,7 +8,7 @@ Interface for help with Alder operations.
 import cfg
 import discord
 
-GENERAL_HELP_VALUE = f'</help:{cfg.HELP_COMMAND_ID}> Get help! Oh wait, you\'re already here.\n</rules:{cfg.RULES_COMMAND_ID}> View the server rules.\n</profile:{cfg.PROFILE_COMMAND_ID}> View your profile.\n→ Using `/profile [member]` will display that member\'s profile!\n</achievements:{cfg.ACHIEVEMENTS_COMMAND_ID}> View your achievement progress.\n</roll:{cfg.ROLL_COMMAND_ID}> Randomly roll a number.\n</8ball:{cfg.EIGHTBALL_COMMAND_ID}> Ask the magic 8 ball a question.\n</motivation:{cfg.MOTIVATION_COMMAND_ID}> Get some motiviation!'
+GENERAL_HELP_VALUE = f'</help:{cfg.HELP_COMMAND_ID}> Get help! Oh wait, you\'re already here.\n</rules:{cfg.RULES_COMMAND_ID}> View the server rules.\n</profile:{cfg.PROFILE_COMMAND_ID}> View your profile.\n→ Using `/profile [member]` will display that member\'s profile!\n→ `/timezone` View and set your timezone.\n</achievements:{cfg.ACHIEVEMENTS_COMMAND_ID}> View your achievement progress.\n</roll:{cfg.ROLL_COMMAND_ID}> Randomly roll a number.\n</8ball:{cfg.EIGHTBALL_COMMAND_ID}> Ask the magic 8 ball a question.\n</motivation:{cfg.MOTIVATION_COMMAND_ID}> Get some motiviation!'
 
 class HelpPageTurner(discord.ui.View):
     def __init__(self, embed: discord.Embed, user_id: int):
@@ -33,6 +33,11 @@ class HelpPageTurner(discord.ui.View):
     @discord.ui.button(label='📝 Todo', style=discord.ButtonStyle.blurple)
     async def options_todo(self, interaction: discord.Interaction, button: discord.ui.button):
         self.embed.set_field_at(0, name='📝 **Todo**', value=f'</todo:{cfg.TODO_COMMAND_ID}> View and share your todo list.\n→ `/todo [task I need to complete]` to add a task to your todo list!\n→ `/todo [#]` to complete a selected task.\n→ `/todo [#] [My updated name for my task]` to update your task name.\n→ `/todo remove [#]` to remove a todo list item.\n→ `/todo clear` to clear your todo list.', inline=False)
+        await interaction.response.edit_message(embed=self.embed, view=self)
+
+    @discord.ui.button(label='⏰ Reminders', style=discord.ButtonStyle.blurple)
+    async def options_todo(self, interaction: discord.Interaction, button: discord.ui.button):
+        self.embed.set_field_at(0, name='⏰ **Reminders**', value=f'`/reminders` View your active reminders.\n→ `/reminders title: remind_date:YYYY-MM-DD remind_time:HH:MM` create a one time reminder!\n→ Add a `repeat_interval` of `daily`, `weekly`, or `monthly` to be reminded on interval!\n→ `/deletereminder [#]` to delete an active reminder.', inline=False)
         await interaction.response.edit_message(embed=self.embed, view=self)
 
     @discord.ui.button(label='🏆 Leaderboards', style=discord.ButtonStyle.blurple)
