@@ -71,7 +71,7 @@ class RbClient():
 
         # Construct request body
         request_body = {
-            "xp": xp_to_add
+            "xp": int(xp_to_add)
         }
 
         # Make API call
