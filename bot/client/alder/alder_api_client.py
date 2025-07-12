@@ -9,6 +9,7 @@ Uses the requests module to perform the HTTP requests.
 import cfg
 import requests
 import traceback
+import json
 
 from tools.log import Logger
 
@@ -43,11 +44,14 @@ class AlderAPIClient():
         Performs a HTTP GET request against the Alder API
         given a path. Returns the response.
         """
+        url = f'{BASE_URL}{path}'
         try:
-            response = requests.get(f'{BASE_URL}{path}', timeout=1)
+            Logger.debug(f'[GET] Request URL: {url}')
+            response = requests.get(url, timeout=5)
+            Logger.debug(f'[GET] Response {response.status_code}: {response.text}')
             return response
         except Exception as e:
-            Logger.error(f'Error occurred during Alder API GET {BASE_URL}{path}: {str(e)}')
+            Logger.error(f'Error during GET {url}: {str(e)}')
             traceback.print_exc()
             return None
 
@@ -58,11 +62,15 @@ class AlderAPIClient():
         given the path and optional request body. Returns the
         response.
         """
+        url = f'{BASE_URL}{path}'
         try:
-            response = requests.post(f'{BASE_URL}{path}', json=request_body, timeout=1)
+            Logger.debug(f'[POST] Request URL: {url}')
+            Logger.debug(f'[POST] Request Body: {json.dumps(request_body)}')
+            response = requests.post(url, json=request_body, timeout=5)
+            Logger.debug(f'[POST] Response {response.status_code}: {response.text}')
             return response
         except Exception as e:
-            Logger.error(f'Error occurred during Alder API POST {BASE_URL}{path}: {str(e)}')
+            Logger.error(f'Error during POST {url}: {str(e)}')
             traceback.print_exc()
             return None
 
@@ -73,11 +81,15 @@ class AlderAPIClient():
         given the path and optional request body. Returns the
         response.
         """
+        url = f'{BASE_URL}{path}'
         try:
-            response = requests.patch(f'{BASE_URL}{path}', json=request_body, timeout=1)
+            Logger.debug(f'[PATCH] Request URL: {url}')
+            Logger.debug(f'[PATCH] Request Body: {json.dumps(request_body)}')
+            response = requests.patch(url, json=request_body, timeout=5)
+            Logger.debug(f'[PATCH] Response {response.status_code}: {response.text}')
             return response
         except Exception as e:
-            Logger.error(f'Error occurred during Alder API PATCH {BASE_URL}{path}: {str(e)}')
+            Logger.error(f'Error during PATCH {url}: {str(e)}')
             traceback.print_exc()
             return None
 
@@ -88,11 +100,15 @@ class AlderAPIClient():
         given the path and optional request body. Returns the
         response.
         """
+        url = f'{BASE_URL}{path}'
         try:
-            response = requests.put(f'{BASE_URL}{path}', json=request_body, timeout=1)
+            Logger.debug(f'[PUT] Request URL: {url}')
+            Logger.debug(f'[PUT] Request Body: {json.dumps(request_body)}')
+            response = requests.put(url, json=request_body, timeout=5)
+            Logger.debug(f'[PUT] Response {response.status_code}: {response.text}')
             return response
         except Exception as e:
-            Logger.error(f'Error occurred during Alder API PUT {BASE_URL}{path}: {str(e)}')
+            Logger.error(f'Error during PUT {url}: {str(e)}')
             traceback.print_exc()
             return None
 
@@ -102,10 +118,13 @@ class AlderAPIClient():
         Performs HTTP DELETE against the Alder API given
         the path. Returns the response.
         """
+        url = f'{BASE_URL}{path}'
         try:
-            response = requests.delete(f'{BASE_URL}{path}', timeout=1)
+            Logger.debug(f'[DELETE] Request URL: {url}')
+            response = requests.delete(url, timeout=5)
+            Logger.debug(f'[DELETE] Response {response.status_code}: {response.text}')
             return response
         except Exception as e:
-            Logger.error(f'Error occurred during Alder API DELETE {BASE_URL}{path}: {str(e)}')
+            Logger.error(f'Error during DELETE {url}: {str(e)}')
             traceback.print_exc()
             return None
